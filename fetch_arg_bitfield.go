@@ -1,0 +1,52 @@
+package tkbtf
+
+import (
+	"fmt"
+	"math/bits"
+)
+
+// BitFieldTypeMask generates the string representation of a bitfield fetchArg type based on the given mask value
+// (https://docs.kernel.org/trace/kprobetrace.html#types). Specifically, it dynamically determines the leading zeros,
+// ones count, and size of container based on the mask (supported types are uint8, uint16, uint32, or uint64) and performs
+// the necessary calculations to build the respective string representation of a bitfield type. When this type
+// is assigned to a fetchArg, it causes only the bits of the fetch arg value that fall withing the original mask
+// to remain (ret := fetchArgValue & mask) and then be shifted all the way to the right (ret := ret >> maskTrailingZeros).
+// The bitfield type has a format of "b{bitWidth}@{bitOffset}/{containerSize}".
+//
+// Note: masks without consecutive ones (e.g. 0x5) are not supported and their behavior is undefined.
+func BitFieldTypeMask[T interface {
+	uint8 | uint16 | uint32 | uint64
+}](mask T) string {
+	var (
+		leadingZeros      int // Number of leading zeros in the mask
+		onesCount         int // Number of set bits (ones) in the mask
+		containerSizeBits int // Size of the container in bits (8, 16, 32, or 64)
+	)
+
+	// Determine the type of the mask and perform the necessary calculations based on it
+	switch maskWithType := any(mask).(type) {
+	case uint8:
+		leadingZeros = bits.LeadingZeros8(maskWithType)
+		onesCount = bits.OnesCount8(maskWithType)
+		containerSizeBits = 8
+	case uint16:
+		leadingZeros = bits.LeadingZeros16(maskWithType)
+		onesCount = bits.OnesCount16(maskWithType)
+		containerSizeBits = 16
+	case uint32:
+		leadingZeros = bits.LeadingZeros32(maskWithType)
+		onesCount = bits.OnesCount32(maskWithType)
+		containerSizeBits = 32
+	case uint64:
+		leadingZeros = bits.LeadingZeros64(maskWithType)
+		onesCount = bits.OnesCount64(maskWithType)
+		containerSizeBits = 64
+	}
+
+	// Calculate the bit offset and a bit width
+	bo := containerSizeBits - onesCount - leadingZeros
+	bw := onesCount
+
+	// Create and return the string representation of the bit field type
+	return fmt.Sprintf("b%d@%d/%d", bw, bo, containerSizeBits)
+}
