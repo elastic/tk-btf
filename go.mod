@@ -3,7 +3,6 @@ module github.com/elastic/tk-btf
 go 1.21.4
 
 require (
-	github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df
 	github.com/cilium/ebpf v0.12.3
 	github.com/stretchr/testify v1.8.4
 )
