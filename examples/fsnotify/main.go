@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"golang.org/x/sys/unix"
 	"io/fs"
 	"log"
 	"log/slog"
@@ -14,13 +15,13 @@ import (
 )
 
 const (
-	fsEventModify    = uint32(0x00000002)
-	fsEventAttrib    = uint32(0x00000004)
-	fsEventMovedFrom = uint32(0x00000040)
-	fsEventMovedTo   = uint32(0x00000080)
-	fsEventCreate    = uint32(0x00000100)
-	fsEventDelete    = uint32(0x00000200)
-	fsEventIsDir     = uint32(0x40000000)
+	fsEventModify    = uint32(unix.IN_MODIFY)
+	fsEventAttrib    = uint32(unix.IN_ATTRIB)
+	fsEventMovedFrom = uint32(unix.IN_MOVED_FROM)
+	fsEventMovedTo   = uint32(unix.IN_MOVED_TO)
+	fsEventCreate    = uint32(unix.IN_CREATE)
+	fsEventDelete    = uint32(unix.IN_DELETE)
+	fsEventIsDir     = uint32(unix.IN_ISDIR)
 )
 
 const (
