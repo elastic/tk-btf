@@ -107,7 +107,7 @@ func loadFSNotifyParentSymbol(symbolMap map[string]*tkbtf.Symbol) {
 }
 
 func loadFSNotifyNameRemoveSymbol(symbolMap map[string]*tkbtf.Symbol) {
-	fsNotifyParentSymbol := tkbtf.NewSymbol("fsnotify_nameremove").AddProbes(
+	fsNotifyNameRemoveSymbol := tkbtf.NewSymbol("fsnotify_nameremove").AddProbes(
 		tkbtf.NewKProbe().AddFetchArgs(
 			tkbtf.NewFetchArg("pi", "u64").FuncParamWithName("dentry", "d_parent", "d_inode", "i_ino"),
 			tkbtf.NewFetchArg("mid", "u32").FuncParamWithName("isdir"),
@@ -118,7 +118,7 @@ func loadFSNotifyNameRemoveSymbol(symbolMap map[string]*tkbtf.Symbol) {
 		),
 	)
 
-	symbolMap["fsnotify_nameremove"] = fsNotifyParentSymbol
+	symbolMap["fsnotify_nameremove"] = fsNotifyNameRemoveSymbol
 }
 
 func main() {
