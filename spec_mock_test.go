@@ -257,7 +257,15 @@ func (m *mockedBTFSpecWithTypesMap) copy() btfSpec {
 		typesCopy[k] = v
 	}
 
-	return &mockedBTFSpecWithTypesMap{Types: typesCopy}
+	idsCopy := make(map[btf.Type]btf.TypeID)
+	for k, v := range m.Ids {
+		idsCopy[k] = v
+	}
+
+	return &mockedBTFSpecWithTypesMap{
+		Types: typesCopy,
+		Ids:   idsCopy,
+	}
 }
 
 func (m *mockedBTFSpecWithTypesMap) AnyTypesByName(name string) ([]btf.Type, error) {
