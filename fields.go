@@ -109,6 +109,8 @@ func buildFieldsWithWrap(spec btfSpec, wrap Wrap, fields []*field) error {
 			},
 		}
 		baseBtfType = customStruct
+	default:
+		return ErrUnsupportedWrapType
 	}
 
 	// Update the paramTypeToSearch struct with the BTF type information

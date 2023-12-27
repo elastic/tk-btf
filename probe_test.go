@@ -75,6 +75,14 @@ func TestProbes(t *testing.T) {
 			err:                nil,
 		},
 		{
+			name:        "kprobe_unsupported_wrap_type",
+			symbolNames: []string{"test_function"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithCustomType("dentry_param", 10000, "inode", "i_ino"),
+			),
+			err: ErrUnsupportedWrapType,
+		},
+		{
 			name:        "kprobe_func_param_not_found",
 			symbolNames: []string{"test_function"},
 			probe: NewKProbe().AddFetchArgs(
