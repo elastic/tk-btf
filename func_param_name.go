@@ -24,7 +24,7 @@ func (p *funcParamWithName) build(_ btfSpec, probeType ProbeType, funcType *btf.
 
 	funcProtoType, ok := funcType.Type.(*btf.FuncProto)
 	if !ok {
-		return "", fmt.Errorf("btf func type is not a func proto")
+		return "", fmt.Errorf("btf func type is not a func proto %w", ErrFuncParamNotFound)
 	}
 
 	// Iterate through the function parameters to find the fieldsBuilder with the specified name

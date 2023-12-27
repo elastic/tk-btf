@@ -1,6 +1,8 @@
 package tkbtf
 
 import (
+	"fmt"
+
 	"github.com/cilium/ebpf/btf"
 )
 
@@ -21,7 +23,7 @@ func (p *funcReturn) build(_ btfSpec, probeType ProbeType, funcType *btf.Func, r
 	// function prototype is required
 	funcProtoType, ok := funcType.Type.(*btf.FuncProto)
 	if !ok {
-		return "", ErrFuncParamNotFound
+		return "", fmt.Errorf("btf func type is not a func proto %w", ErrFuncParamNotFound)
 	}
 
 	// If there are fields defined for the fieldsBuilder, build them recursively

@@ -25,7 +25,7 @@ func (p *funcParamArbitrary) build(spec btfSpec, probeType ProbeType, funcType *
 	// function prototype is required
 	funcProtoType, ok := funcType.Type.(*btf.FuncProto)
 	if !ok {
-		return "", ErrFuncParamNotFound
+		return "", fmt.Errorf("btf func type is not a func proto %w", ErrFuncParamNotFound)
 	}
 
 	// find the function parameter with the given name.
