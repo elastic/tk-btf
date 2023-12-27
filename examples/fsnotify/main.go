@@ -210,34 +210,34 @@ func main() {
 
 	probesTracingMap := make(map[string]struct{})
 
-	err := filepath.Walk(btfHubArchiveRepoPath, func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(btfHubArchiveRepoPath, func(path string, info fs.FileInfo, fnErr error) error {
 		if !strings.HasSuffix(path, ".btf") {
 			return nil
 		}
 
-		if err != nil {
-			logger.Warn("error walking path", slog.String("path", path), slog.Any("err", err))
+		if fnErr != nil {
+			logger.Warn("error walking path", slog.String("path", path), slog.Any("fnErr", fnErr))
 			return nil
 		}
 
-		spec, err := tkbtf.NewSpecFromPath(path)
-		if err != nil {
-			logger.Warn("error loading spec", slog.String("path", path), slog.Any("err", err))
+		spec, fnErr := tkbtf.NewSpecFromPath(path)
+		if fnErr != nil {
+			logger.Warn("error loading spec", slog.String("path", path), slog.Any("fnErr", fnErr))
 			return nil
 		}
 
 		var symbolsToKeep []*tkbtf.Symbol
 		var newTracingProbe bool
 		for symbolName, symbol := range symbolMap {
-			err = spec.BuildSymbol(symbol)
-			if err != nil {
+			fnErr = spec.BuildSymbol(symbol)
+			if fnErr != nil {
 				switch {
-				case symbolName == "fsnotify_nameremove" && errors.Is(err, tkbtf.ErrSymbolNotFound):
+				case symbolName == "fsnotify_nameremove" && errors.Is(fnErr, tkbtf.ErrSymbolNotFound):
 					continue
-				case symbolName == "vfs_getattr_nosec" && errors.Is(err, tkbtf.ErrSymbolNotFound):
+				case symbolName == "vfs_getattr_nosec" && errors.Is(fnErr, tkbtf.ErrSymbolNotFound):
 					continue
 				default:
-					logger.Warn("error building symbol", slog.String("path", path), slog.String("symbol", symbolName), slog.Any("err", err))
+					logger.Warn("error building symbol", slog.String("path", path), slog.String("symbol", symbolName), slog.Any("fnErr", fnErr))
 					continue
 				}
 			}
@@ -260,7 +260,7 @@ func main() {
 
 		strippedSpecPath := path + ".stripped"
 		if err := spec.StripAndSave(strippedSpecPath, symbolsToKeep...); err != nil {
-			logger.Warn("error stripping spec", slog.String("path", strippedSpecPath), slog.Any("err", err))
+			logger.Warn("error stripping spec", slog.String("path", strippedSpecPath), slog.Any("fnErr", err))
 			return nil
 		}
 		logger.Info("produced stripped spec", slog.String("path", strippedSpecPath))
