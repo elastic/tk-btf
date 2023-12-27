@@ -26,9 +26,9 @@ func NewSymbol(symbolNames ...string) *Symbol {
 // NewSymbolWithoutValidation creates and returns a new Symbol instance
 // which during build won't try to extract the function prototype from the btf spec.
 // This is useful in case the function prototype is not available in the btf spec.
-func NewSymbolWithoutValidation(symbolNames ...string) *Symbol {
+func NewSymbolWithoutValidation(symbolName string) *Symbol {
 	return &Symbol{
-		names: symbolNames,
+		names: []string{symbolName},
 		// Set skipValidation field to true to indicate that no validation should be performed.
 		skipValidation: true,
 	}

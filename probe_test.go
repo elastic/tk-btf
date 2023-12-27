@@ -287,7 +287,7 @@ func TestProbes(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var symbol *Symbol
 			if c.skipValidation {
-				symbol = NewSymbolWithoutValidation(c.symbolNames...).AddProbes(c.probe)
+				symbol = NewSymbolWithoutValidation(c.symbolNames[0]).AddProbes(c.probe)
 			} else {
 				symbol = NewSymbol(c.symbolNames...).AddProbes(c.probe)
 			}
