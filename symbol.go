@@ -73,8 +73,6 @@ func (s *Symbol) build(spec btfSpec, regs registersResolver) error {
 				allErr = errors.Join(allErr, fmt.Errorf("getting func of %s failed: %w", symbolName, ErrSymbolNotFound))
 				continue
 			}
-
-			s.foundSymbolName = symbolName
 			break
 		}
 
@@ -82,10 +80,7 @@ func (s *Symbol) build(spec btfSpec, regs registersResolver) error {
 			return allErr
 		}
 
-		if s.foundSymbolName == "" {
-			allErr = errors.Join(allErr, fmt.Errorf("could not find any symbol: %w", ErrSymbolNotFound))
-			return allErr
-		}
+		s.foundSymbolName = funcType.Name
 	} else {
 		s.foundSymbolName = s.names[0]
 	}
