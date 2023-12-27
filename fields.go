@@ -1,6 +1,7 @@
 package tkbtf
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -43,7 +44,7 @@ func buildFieldsWithWrap(spec btfSpec, wrap Wrap, fields []*field) error {
 	// Search for the BTF types with the specified name
 	btfTypes, err := spec.AnyTypesByName(paramTypeToSearch.name)
 	if err != nil {
-		return ErrFieldNotFound
+		return errors.Join(ErrFieldNotFound, err)
 	}
 
 	var btfTarget btf.Type
