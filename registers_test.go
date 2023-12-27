@@ -17,10 +17,6 @@ func Test_getRegistersResolver(t *testing.T) {
 			err:  nil,
 		},
 		{
-			arch: "386",
-			err:  nil,
-		},
-		{
 			arch: "arm64",
 			err:  nil,
 		},
@@ -109,76 +105,6 @@ func TestRegistersAmd64_GetFuncParamRegister(t *testing.T) {
 
 func TestRegistersAmd64_GetReturnRegister(t *testing.T) {
 	regs, err := getRegistersResolver("amd64")
-	require.NoError(t, err)
-
-	require.Equal(t, regs.GetFuncReturnRegister(), "%ax")
-}
-
-func TestRegisters386_GetFuncParamRegister(t *testing.T) {
-	regs, err := getRegistersResolver("386")
-	require.NoError(t, err)
-
-	cases := []struct {
-		name       string
-		reg        string
-		paramIndex int
-		err        error
-	}{
-		{
-			name:       "386_param_0",
-			reg:        "%ax",
-			paramIndex: 0,
-			err:        nil,
-		},
-		{
-			name:       "386_param_1",
-			reg:        "%dx",
-			paramIndex: 1,
-			err:        nil,
-		},
-		{
-			name:       "386_param_2",
-			reg:        "%cx",
-			paramIndex: 2,
-			err:        nil,
-		},
-		{
-			name:       "386_param_3",
-			reg:        "$stack1",
-			paramIndex: 3,
-			err:        nil,
-		},
-		{
-			name:       "386_param_4",
-			reg:        "$stack2",
-			paramIndex: 4,
-			err:        nil,
-		},
-		{
-			name:       "386_param_5",
-			reg:        "$stack3",
-			paramIndex: 5,
-			err:        nil,
-		},
-		{
-			name:       "386_param_6",
-			reg:        "",
-			paramIndex: 6,
-			err:        ErrUnsupportedFuncParamIndex,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			reg, err := regs.GetFuncParamRegister(c.paramIndex)
-			require.Equal(t, c.reg, reg)
-			require.ErrorIs(t, err, c.err)
-		})
-	}
-}
-
-func TestRegisters386_GetReturnRegister(t *testing.T) {
-	regs, err := getRegistersResolver("386")
 	require.NoError(t, err)
 
 	require.Equal(t, regs.GetFuncReturnRegister(), "%ax")

@@ -25,8 +25,6 @@ func getRegistersResolver(arch string) (registersResolver, error) {
 		return &registersAmd64{}, nil
 	case "arm64":
 		return &registersArm64{}, nil
-	case "386":
-		return &registers386{}, nil
 	default:
 		return nil, fmt.Errorf("%s not supported: %w", arch, ErrUnsupportedArch)
 	}
@@ -82,30 +80,4 @@ func (*registersArm64) GetFuncParamRegister(paramIndex int) (string, error) {
 
 func (*registersArm64) GetFuncReturnRegister() string {
 	return "%x0"
-}
-
-// registers386 is the registersResolver implementation for 386 architecture
-type registers386 struct{}
-
-func (*registers386) GetFuncParamRegister(index int) (string, error) {
-	switch index {
-	case 0:
-		return "%ax", nil
-	case 1:
-		return "%dx", nil
-	case 2:
-		return "%cx", nil
-	case 3:
-		return "$stack1", nil
-	case 4:
-		return "$stack2", nil
-	case 5:
-		return "$stack3", nil
-	default:
-		return "", ErrUnsupportedFuncParamIndex
-	}
-}
-
-func (*registers386) GetFuncReturnRegister() string {
-	return "%ax"
 }
