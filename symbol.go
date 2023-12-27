@@ -23,7 +23,7 @@ func NewSymbol(symbolNames ...string) *Symbol {
 	}
 }
 
-// NewSymbolWithoutValidation is creates and returns a new Symbol instance
+// NewSymbolWithoutValidation creates and returns a new Symbol instance
 // which during build won't try to extract the function prototype from the btf spec.
 // This is useful in case the function prototype is not available in the btf spec.
 func NewSymbolWithoutValidation(symbolNames ...string) *Symbol {
@@ -80,7 +80,7 @@ func (s *Symbol) build(spec btfSpec, regs registersResolver) error {
 	return nil
 }
 
-// GetSymbolName returns the name of the revolved symbol. If the Symbol is set not to validate the symbol
+// GetSymbolName returns the name of the resolved symbol. If the Symbol is set not to validate the symbol
 // it returns the first symbol name of the provided ones during Symbol instantiation.
 //
 // Note if you call GetSymbolName on a Symbol that has not been built, it will return an empty string.
