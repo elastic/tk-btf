@@ -21,4 +21,6 @@ var (
 	ErrIncompatibleFetchArg = errors.New("incompatible fetch arg with probe type")
 	// ErrMissingFieldBuilders means that the fetch args has not any field builders assigned.
 	ErrMissingFieldBuilders = errors.New("missing field builders from fetch arg")
+	// ErrMissingFields means that the fetch arg of a type that requires fields has not any fields assigned.
+	ErrMissingFields = errors.New("missing fields")
 )

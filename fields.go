@@ -32,6 +32,11 @@ func paramFieldsFromNames(fields ...string) []*field {
 
 // buildFieldsWithWrap builds the fields with the provided wrap.
 func buildFieldsWithWrap(spec btfSpec, wrap Wrap, fields []*field) error {
+
+	if len(fields) == 0 {
+		return ErrMissingFields
+	}
+
 	// when we build fields with wrap the first field always points to the target type
 	paramTypeToSearch := fields[0]
 

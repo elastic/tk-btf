@@ -38,6 +38,25 @@ func Test_buildFieldsWithWrap(t *testing.T) {
 			destType: &btf.Struct{},
 		},
 		{
+			name:   "no_fields_specified",
+			wrap:   WrapNone,
+			fields: nil,
+			index:  0,
+			anyTypesByName: []btf.Type{
+				&btf.Int{
+					Name: "dentry",
+				},
+				&btf.Struct{
+					Name: "dentry",
+				},
+				&btf.Func{
+					Name: "dentry",
+				},
+			},
+			err:      ErrMissingFields,
+			destType: &btf.Struct{},
+		},
+		{
 			name:   "any_types_by_name_multiple_types_no_struct",
 			wrap:   WrapNone,
 			fields: paramFieldsFromNames("dentry"),
@@ -69,7 +88,10 @@ func Test_buildFieldsWithWrap(t *testing.T) {
 			spec := mockAnyTypesByNameOnAnything(c.anyTypesByName, c.err)
 			err := buildFieldsWithWrap(spec, c.wrap, c.fields)
 			require.ErrorIs(t, err, c.err)
-			require.IsType(t, c.destType, c.fields[0].btfType)
+
+			if c.fields != nil {
+				require.IsType(t, c.destType, c.fields[0].btfType)
+			}
 		})
 	}
 }
