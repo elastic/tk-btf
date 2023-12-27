@@ -152,7 +152,7 @@ func TestProbes(t *testing.T) {
 				NewFetchArg("fa1", "u32").FuncParamWithName("dentry_param", "d_inode", "i_ino"),
 				NewFetchArg("fa2", "string").FuncParamWithName("dentry_param", "d_name", "name"),
 				NewFetchArg("fa3", "u32").FuncParamWithName("inode_param", "i_ino"),
-			).SetID("test_probe_id"),
+			).SetRef("test_probe_id"),
 			expectedSymbol:     "test_function",
 			expectedID:         "kprobe_test_probe_id",
 			expectedType:       ProbeTypeKProbe,

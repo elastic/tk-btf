@@ -18,7 +18,7 @@ const (
 )
 
 type Probe struct {
-	id         string
+	ref        string
 	symbolName string
 	probeType  ProbeType
 
@@ -66,10 +66,10 @@ func (p *Probe) AddFetchArgs(args ...*fetchArg) *Probe {
 	return p
 }
 
-// SetID sets the ID of the probe. This is useful when multiple probes are attached to the same symbol
+// SetRef sets the reference name of the probe. This is useful when multiple probes are attached to the same symbol
 // and an extra factor of distinguishing them is required.
-func (p *Probe) SetID(id string) *Probe {
-	p.id = id
+func (p *Probe) SetRef(ref string) *Probe {
+	p.ref = ref
 	return p
 }
 
@@ -103,7 +103,8 @@ func (p *Probe) GetType() ProbeType {
 	return p.probeType
 }
 
-// GetID returns the ID of the Probe. Note if no ID is set, GetID utilises the symbol name.
+// GetID returns the ID of the Probe. The ID is the result of combining the probe
+// type and the symbol name or the reference name if it is set.
 func (p *Probe) GetID() string {
 	var id strings.Builder
 
@@ -115,10 +116,10 @@ func (p *Probe) GetID() string {
 	}
 
 	switch {
-	case p.id == "":
+	case p.ref == "":
 		id.WriteString(p.symbolName)
 	default:
-		id.WriteString(p.id)
+		id.WriteString(p.ref)
 	}
 
 	return id.String()
