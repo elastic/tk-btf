@@ -25,4 +25,6 @@ var (
 	ErrMissingFields = errors.New("missing fields")
 	// ErrDuplicateFetchArgs means that two or more fetch args with the same name are specified.
 	ErrDuplicateFetchArgs = errors.New("duplicate fetch args")
+	// ErrMissingSymbolNames means that no symbol names are specified.
+	ErrMissingSymbolNames = errors.New("missing symbol Names")
 )

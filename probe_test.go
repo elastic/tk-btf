@@ -281,6 +281,31 @@ func TestProbes(t *testing.T) {
 			),
 			err: ErrMissingFieldBuilders,
 		},
+		{
+			name:        "kprobe_empty_names",
+			symbolNames: []string{"   ", "    "},
+			probe: NewKRetProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32"),
+			),
+			err: ErrMissingSymbolNames,
+		},
+		{
+			name:        "kprobe_missing_names",
+			symbolNames: nil,
+			probe: NewKRetProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32"),
+			),
+			err: ErrMissingSymbolNames,
+		},
+		{
+			name:        "kprobe_without_validation_missing_name",
+			symbolNames: []string{"   "},
+			probe: NewKRetProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32"),
+			),
+			skipValidation: true,
+			err:            ErrMissingSymbolNames,
+		},
 	}
 
 	for _, c := range cases {

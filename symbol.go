@@ -3,6 +3,7 @@ package tkbtf
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cilium/ebpf/btf"
 )
@@ -17,21 +18,35 @@ type Symbol struct {
 
 // NewSymbol creates and returns a new Symbol instance with the given symbol names.
 func NewSymbol(symbolNames ...string) *Symbol {
-	return &Symbol{
-		names:          symbolNames,
+	symbol := &Symbol{
 		skipValidation: false,
 	}
+
+	for _, symbolName := range symbolNames {
+		trimmedSymbolName := strings.TrimSpace(symbolName)
+		if trimmedSymbolName != "" {
+			symbol.names = append(symbol.names, trimmedSymbolName)
+		}
+	}
+
+	return symbol
 }
 
 // NewSymbolWithoutValidation creates and returns a new Symbol instance
 // which during build won't try to extract the function prototype from the btf spec.
 // This is useful in case the function prototype is not available in the btf spec.
 func NewSymbolWithoutValidation(symbolName string) *Symbol {
-	return &Symbol{
-		names: []string{symbolName},
+	symbol := &Symbol{
 		// Set skipValidation field to true to indicate that no validation should be performed.
 		skipValidation: true,
 	}
+
+	trimmedSymbolName := strings.TrimSpace(symbolName)
+	if trimmedSymbolName != "" {
+		symbol.names = append(symbol.names, trimmedSymbolName)
+	}
+
+	return symbol
 }
 
 // AddProbes attaches the given probes to the Symbol.
@@ -44,6 +59,10 @@ func (s *Symbol) AddProbes(p ...*Probe) *Symbol {
 // It returns an error if any symbol is not found or if there is an error in building the symbol.
 func (s *Symbol) build(spec btfSpec, regs registersResolver) error {
 	var funcType *btf.Func
+
+	if len(s.names) == 0 {
+		return ErrMissingSymbolNames
+	}
 
 	// If skipValidation is false, validate each symbol until the first successfully validated
 	if !s.skipValidation {
