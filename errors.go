@@ -23,4 +23,6 @@ var (
 	ErrMissingFieldBuilders = errors.New("missing field builders from fetch arg")
 	// ErrMissingFields means that the fetch arg of a type that requires fields has not any fields assigned.
 	ErrMissingFields = errors.New("missing fields")
+	// ErrDuplicateFetchArgs means that two or more fetch args with the same name are specified.
+	ErrDuplicateFetchArgs = errors.New("duplicate fetch args")
 )

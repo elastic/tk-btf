@@ -22,6 +22,8 @@ type Probe struct {
 	symbolName string
 	probeType  ProbeType
 
+	duplicateFetchArgs bool
+
 	fetchArgOrderName []string
 	fetchArgs         map[string]*fetchArg
 
@@ -53,6 +55,8 @@ func (p *Probe) AddFetchArgs(args ...*fetchArg) *Probe {
 		if _, exists := p.fetchArgs[a.name]; !exists {
 			// If it doesn't exist, add the fetchArg name to the fetchArgOrderName slice
 			p.fetchArgOrderName = append(p.fetchArgOrderName, a.name)
+		} else {
+			p.duplicateFetchArgs = true
 		}
 
 		// Add the fetchArg to the fetchArgs map
@@ -124,6 +128,10 @@ func (p *Probe) GetID() string {
 // the order they were attached. It returns any error encountered during the build process.
 func (p *Probe) build(symbolName string, spec btfSpec, funcType *btf.Func, regs registersResolver) error {
 	var probeTracing strings.Builder
+
+	if p.duplicateFetchArgs {
+		return ErrDuplicateFetchArgs
+	}
 
 	p.symbolName = symbolName
 	p.tracingEventProbe = ""

@@ -36,6 +36,15 @@ func TestProbes(t *testing.T) {
 			err:                nil,
 		},
 		{
+			name:        "kprobe_duplicate_fetch_arg",
+			symbolNames: []string{"test_function"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("dentry_param", "d_inode", "i_ino"),
+				NewFetchArg("fa1", "string").FuncParamWithName("dentry_param", "d_name", "name"),
+			),
+			err: ErrDuplicateFetchArgs,
+		},
+		{
 			name:        "kprobe_index_param",
 			symbolNames: []string{"test_function"},
 			probe: NewKProbe().AddFetchArgs(
