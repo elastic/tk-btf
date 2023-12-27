@@ -42,6 +42,15 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("mmt", tkbtf.BitFieldTypeMask(fsEventMovedTo)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("mmf", tkbtf.BitFieldTypeMask(fsEventMovedFrom)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("fi", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_ctime", "tv_sec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "i_ctime", "tv_nsec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_inode", "__i_ctime", "tv_nsec"),
 			tkbtf.NewFetchArg("dt", "s32").FuncParamWithName("data_type").FuncParamWithName("data_is"),
 			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
@@ -59,6 +68,15 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("mmf", tkbtf.BitFieldTypeMask(fsEventMovedFrom)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("nptr", "u64").FuncParamWithName("file_name"),
 			tkbtf.NewFetchArg("fi", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_ctime", "tv_sec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "i_ctime", "tv_nsec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "inode", "__i_ctime", "tv_nsec"),
 			tkbtf.NewFetchArg("dt", "s32").FuncParamWithName("data_type").FuncParamWithName("data_is"),
 			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithName("dir", "i_sb", "s_dev").FuncParamWithName("to_tell", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithName("dir", "i_sb", "s_dev").FuncParamWithName("to_tell", "i_sb", "s_dev"),
@@ -75,6 +93,15 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("mmt", tkbtf.BitFieldTypeMask(fsEventMovedTo)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("mmf", tkbtf.BitFieldTypeMask(fsEventMovedFrom)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("fi", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_ctime", "tv_sec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "i_ctime", "tv_nsec").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_inode", "__i_ctime", "tv_nsec"),
 			tkbtf.NewFetchArg("dt", "s32").FuncParamWithName("data_type").FuncParamWithName("data_is"),
 			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
@@ -83,6 +110,29 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 	)
 
 	symbolMap["fsnotify"] = fsNotifySymbol
+}
+
+func loadVFSGetAttr(symbolMap map[string]*tkbtf.Symbol) {
+	vfsGetAttrSymbol := tkbtf.NewSymbol("vfs_getattr_nosec", "vfs_getattr").AddProbes(
+		tkbtf.NewKProbe().AddFetchArgs(
+			tkbtf.NewFetchArg("pi", "u64").FuncParamWithName("path", "dentry", "d_parent", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fi", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithName("path", "dentry", "d_inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithName("path", "dentry", "d_inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithName("path", "dentry", "d_inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_ctime", "tv_sec").FuncParamWithName("path", "dentry", "d_inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithName("path", "dentry", "d_inode", "i_ctime", "tv_nsec").FuncParamWithName("path", "dentry", "d_inode", "__i_ctime", "tv_nsec"),
+			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithName("path", "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
+			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithName("path", "dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
+			tkbtf.NewFetchArg("fn", "string").FuncParamWithName("path", "dentry", "d_name", "name"),
+		),
+	)
+
+	symbolMap["vfs_getattr"] = vfsGetAttrSymbol
 }
 
 func loadFSNotifyParentSymbol(symbolMap map[string]*tkbtf.Symbol) {
@@ -97,6 +147,15 @@ func loadFSNotifyParentSymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("mmt", tkbtf.BitFieldTypeMask(fsEventMovedTo)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("mmf", tkbtf.BitFieldTypeMask(fsEventMovedFrom)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("fi", "u64").FuncParamWithName("dentry", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithName("dentry", "d_inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithName("dentry", "d_inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithName("dentry", "d_inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithName("dentry", "d_inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithName("dentry", "d_inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithName("dentry", "d_inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithName("dentry", "d_inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithName("dentry", "d_inode", "i_ctime", "tv_sec").FuncParamWithName("dentry", "d_inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithName("dentry", "d_inode", "i_ctime", "tv_nsec").FuncParamWithName("dentry", "d_inode", "__i_ctime", "tv_nsec"),
 			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithName("dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithName("dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("fn", "string").FuncParamWithName("dentry", "d_name", "name"),
@@ -112,6 +171,15 @@ func loadFSNotifyNameRemoveSymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("pi", "u64").FuncParamWithName("dentry", "d_parent", "d_inode", "i_ino"),
 			tkbtf.NewFetchArg("mid", "u32").FuncParamWithName("isdir"),
 			tkbtf.NewFetchArg("fi", "u64").FuncParamWithName("dentry", "d_inode", "i_ino"),
+			tkbtf.NewFetchArg("fm", "u8").FuncParamWithName("dentry", "d_inode", "i_mode"),
+			tkbtf.NewFetchArg("fuid", "u32").FuncParamWithName("dentry", "d_inode", "i_uid"),
+			tkbtf.NewFetchArg("fgid", "u32").FuncParamWithName("dentry", "d_inode", "i_gid"),
+			tkbtf.NewFetchArg("fats", "u64").FuncParamWithName("dentry", "d_inode", "i_atime", "tv_sec"),
+			tkbtf.NewFetchArg("fatn", "u64").FuncParamWithName("dentry", "d_inode", "i_atime", "tv_nsec"),
+			tkbtf.NewFetchArg("fmts", "u64").FuncParamWithName("dentry", "d_inode", "i_mtime", "tv_sec"),
+			tkbtf.NewFetchArg("fmtn", "u64").FuncParamWithName("dentry", "d_inode", "i_mtime", "tv_nsec"),
+			tkbtf.NewFetchArg("fcts", "u64").FuncParamWithName("dentry", "d_inode", "i_ctime", "tv_sec").FuncParamWithName("dentry", "d_inode", "__i_ctime", "tv_sec"),
+			tkbtf.NewFetchArg("fctn", "u64").FuncParamWithName("dentry", "d_inode", "i_ctime", "tv_nsec").FuncParamWithName("dentry", "d_inode", "__i_ctime", "tv_nsec"),
 			tkbtf.NewFetchArg("pdmj", tkbtf.BitFieldTypeMask(devMajor)).FuncParamWithName("dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("pdmn", tkbtf.BitFieldTypeMask(devMinor)).FuncParamWithName("dentry", "d_parent", "d_inode", "i_sb", "s_dev"),
 			tkbtf.NewFetchArg("fn", "string").FuncParamWithName("dentry", "d_name", "name"),
@@ -138,6 +206,7 @@ func main() {
 	loadFSNotifySymbol(symbolMap)
 	loadFSNotifyParentSymbol(symbolMap)
 	loadFSNotifyNameRemoveSymbol(symbolMap)
+	loadVFSGetAttr(symbolMap)
 
 	probesTracingMap := make(map[string]struct{})
 
@@ -162,17 +231,22 @@ func main() {
 		for symbolName, symbol := range symbolMap {
 			err = spec.BuildSymbol(symbol)
 			if err != nil {
-				if symbolName == "fsnotify_nameremove" && errors.Is(err, tkbtf.ErrSymbolNotFound) {
+				switch {
+				case symbolName == "fsnotify_nameremove" && errors.Is(err, tkbtf.ErrSymbolNotFound):
+					continue
+				case symbolName == "vfs_getattr_nosec" && errors.Is(err, tkbtf.ErrSymbolNotFound):
+					continue
+				default:
+					logger.Warn("error building symbol", slog.String("path", path), slog.String("symbol", symbolName), slog.Any("err", err))
 					continue
 				}
-				logger.Warn("error building symbol", slog.String("path", path), slog.String("symbol", symbolName), slog.Any("err", err))
-				continue
 			}
 
 			symbolsToKeep = append(symbolsToKeep, symbol)
 
 			for _, p := range symbol.GetProbes() {
 				probeKey := p.GetSymbolName() + p.GetTracingEventProbe() + p.GetTracingEventFilter()
+
 				if _, exists := probesTracingMap[probeKey]; !exists {
 					probesTracingMap[probeKey] = struct{}{}
 					newTracingProbe = true
