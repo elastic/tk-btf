@@ -220,7 +220,7 @@ func main() {
 			return nil
 		}
 
-		spec, fnErr := tkbtf.NewSpecFromPath(path)
+		spec, fnErr := tkbtf.NewSpecFromPath(path, nil)
 		if fnErr != nil {
 			logger.Warn("error loading spec", slog.String("path", path), slog.Any("fnErr", fnErr))
 			return nil

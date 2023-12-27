@@ -62,7 +62,7 @@ func TestSpec(t *testing.T) {
 	require.NoError(t, err)
 
 	// load stripped spec from path; NOTE this an actual implementation of *btf.Spec
-	pathSpec, err := NewSpecFromPath(fileName)
+	pathSpec, err := NewSpecFromPath(fileName, nil)
 	require.NoError(t, err)
 	// check that qstr is actually stripped
 	_, err = pathSpec.spec.AnyTypesByName("qstr")
@@ -92,7 +92,7 @@ func TestSpec(t *testing.T) {
 		_ = file.Close()
 	}()
 
-	readerSpec, err := NewSpecFromReader(file)
+	readerSpec, err := NewSpecFromReader(file, nil)
 	require.NoError(t, err)
 	// check that qstr is actually stripped
 	_, err = readerSpec.spec.AnyTypesByName("qstr")

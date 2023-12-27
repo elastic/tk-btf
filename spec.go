@@ -18,6 +18,10 @@ type btfSpec interface {
 	typeID(t btf.Type) (btf.TypeID, error)
 }
 
+type SpecOptions struct {
+	arch string
+}
+
 // Spec holds the btfSpec and the registersResolver.
 type Spec struct {
 	spec btfSpec
@@ -43,23 +47,37 @@ func NewSpecFromKernel() (*Spec, error) {
 }
 
 // NewSpecFromReader generates a new Spec from the given io.ReaderAt.
-func NewSpecFromReader(rd io.ReaderAt) (*Spec, error) {
+func NewSpecFromReader(rd io.ReaderAt, opts *SpecOptions) (*Spec, error) {
 	spec, err := btf.LoadSpecFromReader(rd)
 	if err != nil {
 		return nil, err
 	}
 
-	return specFromBTF(spec, runtime.GOARCH)
+	var arch string
+	if opts != nil {
+		arch = opts.arch
+	} else {
+		arch = runtime.GOARCH
+	}
+
+	return specFromBTF(spec, arch)
 }
 
 // NewSpecFromPath generates a new Spec from the given file path.
-func NewSpecFromPath(path string) (*Spec, error) {
+func NewSpecFromPath(path string, opts *SpecOptions) (*Spec, error) {
 	spec, err := btf.LoadSpec(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return specFromBTF(spec, runtime.GOARCH)
+	var arch string
+	if opts != nil {
+		arch = opts.arch
+	} else {
+		arch = runtime.GOARCH
+	}
+
+	return specFromBTF(spec, arch)
 }
 
 func specFromBTF(spec *btf.Spec, arch string) (*Spec, error) {
