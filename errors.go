@@ -14,7 +14,7 @@ var (
 	// ErrUnsupportedFuncParamIndex means that the parameter index could not be mapped to any register.
 	ErrUnsupportedFuncParamIndex = errors.New("unsupported func parameter index")
 	// ErrUnsupportedArch means that the architecture is not supported.
-	// Currently, arm64, amd64, 386 are supported.
+	// Currently, arm64, and amd64 are supported.
 	ErrUnsupportedArch = errors.New("unsupported architecture")
 	// ErrIncompatibleFetchArg means that a fetch arg is assigned to probe type that is not compatible with,
 	// e.g. FuncParamArbitrary is not compatible with ProbeTypeKRetProbe.
