@@ -32,7 +32,7 @@ const (
 func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 	fsNotifySymbol := tkbtf.NewSymbol("fsnotify").AddProbes(
 		// Kprobe for fsnotify with FSNOTIFY_EVENT_PATH (data_type==1)
-		tkbtf.NewKProbe().SetID("fsnotify_path").AddFetchArgs(
+		tkbtf.NewKProbe().SetRef("fsnotify_path").AddFetchArgs(
 			tkbtf.NewFetchArg("pi", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_parent", "d_inode", "i_ino"),
 			tkbtf.NewFetchArg("mc", tkbtf.BitFieldTypeMask(fsEventCreate)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("md", tkbtf.BitFieldTypeMask(fsEventDelete)).FuncParamWithName("mask"),
@@ -57,7 +57,7 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("fn", "string").FuncParamWithCustomType("data", tkbtf.WrapPointer, "path", "dentry", "d_name", "name"),
 		),
 		// Kprobe for fsnotify with FSNOTIFY_EVENT_INODE (data_type==2)
-		tkbtf.NewKProbe().SetID("fsnotify_inode").AddFetchArgs(
+		tkbtf.NewKProbe().SetRef("fsnotify_inode").AddFetchArgs(
 			tkbtf.NewFetchArg("pi", "u64").FuncParamWithName("dir", "i_ino").FuncParamWithName("to_tell", "i_ino"),
 			tkbtf.NewFetchArg("mc", tkbtf.BitFieldTypeMask(fsEventCreate)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("md", tkbtf.BitFieldTypeMask(fsEventDelete)).FuncParamWithName("mask"),
@@ -83,7 +83,7 @@ func loadFSNotifySymbol(symbolMap map[string]*tkbtf.Symbol) {
 			tkbtf.NewFetchArg("fn", "string").FuncParamWithName("file_name", "name").FuncParamWithName("file_name"),
 		),
 		// Kprobe for fsnotify with FSNOTIFY_EVENT_DENTRY (data_type==3)
-		tkbtf.NewKProbe().SetID("fsnotify_dentry").AddFetchArgs(
+		tkbtf.NewKProbe().SetRef("fsnotify_dentry").AddFetchArgs(
 			tkbtf.NewFetchArg("pi", "u64").FuncParamWithCustomType("data", tkbtf.WrapPointer, "dentry", "d_parent", "d_inode", "i_ino"),
 			tkbtf.NewFetchArg("mc", tkbtf.BitFieldTypeMask(fsEventCreate)).FuncParamWithName("mask"),
 			tkbtf.NewFetchArg("md", tkbtf.BitFieldTypeMask(fsEventDelete)).FuncParamWithName("mask"),
