@@ -14,7 +14,7 @@ type funcParamWithName struct {
 	fields     []*field
 }
 
-func (p *funcParamWithName) build(_ btfSpec, probeType ProbeType, funcType *btf.Func, regs registersResolver) (string, error) {
+func (p *funcParamWithName) build(spec btfSpec, probeType ProbeType, funcType *btf.Func, regs registersResolver) (string, error) {
 	var arg btf.FuncParam
 
 	// funcParamWithName is compatible only with ProbeTypeKProbe
@@ -44,7 +44,7 @@ func (p *funcParamWithName) build(_ btfSpec, probeType ProbeType, funcType *btf.
 	}
 
 	// build fields recursively
-	if err := buildFieldsRecursive(arg.Type, 0, p.fields); err != nil {
+	if err := buildFieldsRecursive(spec, arg.Type, 0, p.fields); err != nil {
 		return "", err
 	}
 

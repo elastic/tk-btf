@@ -1,6 +1,9 @@
 package tkbtf
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/cilium/ebpf/btf"
 )
 
@@ -25,6 +28,24 @@ func (t typesToStripMap) addTypeField(spec btfSpec, typ btf.Type, field string) 
 		return t.addTypeField(spec, tt.Type, field)
 	case *btf.Typedef:
 		return t.addTypeField(spec, tt.Type, field)
+	case *btf.Array:
+		return t.addTypeField(spec, tt.Type, field)
+	}
+
+	if _, ok := typ.(*btf.Enum); !ok && strings.HasPrefix(field, "enum:") {
+		enumTokens := strings.Split(field, ":")
+		if len(enumTokens) != 3 {
+			return fmt.Errorf("index from enum invalid format: %w", ErrArrayIndexInvalidField)
+		}
+
+		enumName := enumTokens[1]
+		var btfEnum *btf.Enum
+		if err := spec.TypeByName(enumName, &btfEnum); err != nil {
+			return err
+		}
+		if err := t.addTypeField(spec, btfEnum, field); err != nil {
+			return err
+		}
 	}
 
 	id, err := spec.typeID(typ)
@@ -39,10 +60,6 @@ func (t typesToStripMap) addTypeField(spec btfSpec, typ btf.Type, field string) 
 		}
 	}
 
-	if field == "" {
-		return nil
-	}
-
 	t[id].fieldsToKeep[field] = struct{}{}
 	return nil
 }
@@ -55,6 +72,8 @@ func (t typesToStripMap) checkTypeInMap(spec btfSpec, typ btf.Type) bool {
 	case *btf.Const:
 		return t.checkTypeInMap(spec, tt.Type)
 	case *btf.Typedef:
+		return t.checkTypeInMap(spec, tt.Type)
+	case *btf.Array:
 		return t.checkTypeInMap(spec, tt.Type)
 	}
 
