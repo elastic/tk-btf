@@ -29,7 +29,4 @@ write-license-headers:
 		-ext ".go" \
 		-license ASL2 \
 		-licensor "Elasticsearch B.V." \
-		-exclude bpf_bpfel* \
-		-exclude ebpf \
-		-exclude *_string.go \
 		.
