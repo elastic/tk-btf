@@ -115,6 +115,120 @@ func generateBTFSpec() *Spec {
 	}
 	btfTypesMap["dentry"] = dEntry
 
+	enumType := &btf.Enum{
+		Name:   "an_enum",
+		Size:   16,
+		Signed: false,
+		Values: []btf.EnumValue{
+			{
+				Name:  "ENUM_VAL_0",
+				Value: 0,
+			},
+			{
+				Name:  "ENUM_VAL_1",
+				Value: 1,
+			},
+			{
+				Name:  "ENUM_VAL_2",
+				Value: 2,
+			},
+			{
+				Name:  "ENUM_VAL_20",
+				Value: 20,
+			},
+		},
+	}
+	btfTypesMap["an_enum"] = enumType
+
+	credStructType := &btf.Struct{
+		Name: "cred",
+		Size: 176,
+		Members: []btf.Member{
+			{
+				Name:         "uid",
+				Type:         nil,
+				Offset:       32,
+				BitfieldSize: 0,
+			},
+		},
+	}
+	btfTypesMap["cred"] = credStructType
+
+	nrStructType := &btf.Struct{
+		Name: "nr_struct",
+		Size: 16,
+		Members: []btf.Member{
+			{
+				Name:         "val",
+				Type:         typeInt32,
+				Offset:       8,
+				BitfieldSize: 0,
+			},
+		},
+	}
+	btfTypesMap["nr_struct"] = nrStructType
+
+	numbersArrayType := &btf.Array{
+		Index: typeInt32,
+		Type: &btf.Pointer{
+			Target: nrStructType,
+		},
+		Nelems: 4,
+	}
+	btfTypesMap["numbers"] = numbersArrayType
+
+	anonStructType := &btf.Struct{
+		Name: "",
+		Size: 256,
+		Members: []btf.Member{
+			{
+				Name:         "numbers",
+				Type:         numbersArrayType,
+				Offset:       256,
+				BitfieldSize: 0,
+			},
+			{
+				Name: "cred",
+				Type: &btf.Pointer{
+					Target: &btf.Const{
+						Type: credStructType,
+					},
+				},
+				Offset:       16,
+				BitfieldSize: 0,
+			},
+		},
+	}
+	btfTypesMap[""] = anonStructType
+
+	taskStructType := &btf.Struct{
+		Name: "task_struct",
+		Size: 4160,
+		Members: []btf.Member{
+			{
+				Name:         "pid",
+				Type:         typeInt32,
+				Offset:       12032,
+				BitfieldSize: 0,
+			},
+			{
+				Name:         "tgid",
+				Type:         typeInt32,
+				Offset:       12064,
+				BitfieldSize: 0,
+			},
+			{
+				Name: "",
+				Type: &btf.Pointer{
+					Target: anonStructType,
+				},
+				Offset:       32,
+				BitfieldSize: 0,
+			},
+		},
+	}
+	btfTypesMap["task_struct"] = taskStructType
+
 	functionTypeProto := &btf.FuncProto{
 		Return: typeInt16,
 		Params: []btf.FuncParam{
@@ -156,6 +270,12 @@ func generateBTFSpec() *Spec {
 				Name: "inode_param",
 				Type: &btf.Pointer{
 					Target: iNode,
+				},
+			},
+			{
+				Name: "tsk_param",
+				Type: &btf.Pointer{
+					Target: taskStructType,
 				},
 			},
 		},
