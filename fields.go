@@ -218,6 +218,9 @@ func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint3
 
 			var btfEnum *btf.Enum
 			if err := spec.TypeByName(enumName, &btfEnum); err != nil {
+				if errors.Is(err, btf.ErrNotFound) || err.Error() == "not found" {
+					return fmt.Errorf("enum not found in spec: %w", ErrArrayIndexInvalidField)
+				}
 				return err
 			}
 
