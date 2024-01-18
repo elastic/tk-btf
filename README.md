@@ -1,4 +1,6 @@
 # Tracing KProbes from BTF (tk-btf)
+[![Build status](https://badge.buildkite.com/127fe118a0ca01517075701041070b66e1a6c27322132658db.svg)](https://buildkite.com/elastic/tk-btf)
+
 `tk-btf` is a Go package to fabricate the string representation of [Linux tracing kprobes](https://docs.kernel.org/trace/kprobetrace.html#usage-examples) based on [BTF](https://docs.kernel.org/bpf/btf.html) files.
 
 ## Quick Start

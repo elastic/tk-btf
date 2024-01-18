@@ -9,4 +9,4 @@ steps:
     key: "test"
     command: ".buildkite/test.sh"
     agents:
-      image: "golang:1.21.6-alpine3.19"
+      image: "golang:1.21.6-bookworm"

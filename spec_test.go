@@ -20,7 +20,6 @@ package tkbtf
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/cilium/ebpf/btf"
@@ -35,7 +34,7 @@ func TestSpec(t *testing.T) {
 	}()
 
 	spec := generateBTFSpec()
-	spec.regs, err = getRegistersResolver(runtime.GOARCH)
+	spec.regs, err = getRegistersResolver("arm64")
 	require.NoError(t, err)
 
 	c := struct {
@@ -80,7 +79,9 @@ func TestSpec(t *testing.T) {
 	require.NoError(t, err)
 
 	// load stripped spec from path; NOTE this an actual implementation of *btf.Spec
-	pathSpec, err := NewSpecFromPath(fileName, nil)
+	pathSpec, err := NewSpecFromPath(fileName, &SpecOptions{
+		arch: "arm64",
+	})
 	require.NoError(t, err)
 	// check that qstr is actually stripped
 	_, err = pathSpec.spec.AnyTypesByName("qstr")
@@ -110,7 +111,9 @@ func TestSpec(t *testing.T) {
 		_ = file.Close()
 	}()
 
-	readerSpec, err := NewSpecFromReader(file, nil)
+	readerSpec, err := NewSpecFromReader(file, &SpecOptions{
+		arch: "arm64",
+	})
 	require.NoError(t, err)
 	// check that qstr is actually stripped
 	_, err = readerSpec.spec.AnyTypesByName("qstr")
