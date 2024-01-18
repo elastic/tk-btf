@@ -10,7 +10,7 @@ export BTFHUB_ARCHIVE_REPO=$PWD
 find . -iname "*.btf.tar.xz"  -exec sh -c 'tar xvf {} -C $(dirname {})' \;
 ```
 
-#### Run the fsnotify symbol offset extractor:
+#### Run the sched symbols offset extractor:
 ```shell
 go run ./examples/sched/main.go -repo ${BTFHUB_ARCHIVE_REPO}
 ```
