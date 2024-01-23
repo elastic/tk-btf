@@ -1,3 +1,4 @@
+# Declare your Buildkite pipelines below
 ---
 # yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
 apiVersion: backstage.io/v1alpha1
@@ -11,16 +12,19 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:sec-linux-platform
+  owner: group:security-linux-platform
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
       name: tk-btf
+      description: 
     spec:
       repository: elastic/tk-btf
       pipeline_file: ".buildkite/pipeline.yml"
       teams:
-        sec-linux-platform:
+        security-linux-platform:
           access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY

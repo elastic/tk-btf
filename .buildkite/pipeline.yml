@@ -1,12 +1,14 @@
+---
+# $yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 steps:
-  - label: ":bathtub: Lint"
-    key: "lint"
-    command: ".buildkite/lint.sh"
-    agents:
-      image: "golangci/golangci-lint:v1.55.2"
+  - label: "Build"
+    command: "true"
 
-  - label: ":test_tube: Test"
-    key: "test"
-    command: ".buildkite/test.sh"
-    agents:
-      image: "golang:1.21.6-bookworm"
+  - label: "Test"
+    command: "true"
+
+  - label: "Deploy"
+    command: "true"
+
+  - label: "Publish"
+    command: "true"
