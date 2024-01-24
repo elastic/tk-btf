@@ -46,4 +46,6 @@ var (
 	ErrMissingSymbolNames = errors.New("missing symbol names")
 	// ErrUnsupportedWrapType means that the wrap type is not supported.
 	ErrUnsupportedWrapType = errors.New("unsupported wrap type")
+	// ErrArrayIndexInvalidField means that the field specified as an array index is invalid.
+	ErrArrayIndexInvalidField = errors.New("array index invalid field")
 )

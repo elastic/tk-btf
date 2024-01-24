@@ -20,6 +20,7 @@ package tkbtf
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cilium/ebpf/btf"
@@ -136,75 +137,160 @@ func buildFieldsWithWrap(spec btfSpec, wrap Wrap, fields []*field) error {
 	paramTypeToSearch.btfType = baseBtfType
 
 	// Build the BTF representation of the fields recursively
-	if err = buildFieldsRecursive(baseBtfType, 0, fieldsToBuild); err != nil {
+	if err = buildFieldsRecursive(spec, baseBtfType, 0, fieldsToBuild); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+func getArrayTypeSizeBytes(btfType btf.Type) uint32 {
+	switch t := btfType.(type) {
+	case *btf.Union:
+		return t.Size
+	case *btf.Struct:
+		return t.Size
+	case *btf.Int:
+		return t.Size
+	case *btf.Float:
+		return t.Size
+	case *btf.Enum:
+		return t.Size
+	case *btf.Datasec:
+		return t.Size
+	case *btf.Pointer:
+		return 8
+	case *btf.Typedef:
+		return getArrayTypeSizeBytes(t.Type)
+	case *btf.Const:
+		return getArrayTypeSizeBytes(t.Type)
+	default:
+		return 0
+	}
+}
+
 // buildFieldsRecursive recursively builds fields based on the parent type and fields slice.
 // It returns ErrFieldNotFound if any field is not found.
-func buildFieldsRecursive(parent btf.Type, parentOffset btf.Bits, fields []*field) error {
+func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint32, fields []*field) error {
 
 	// If there are no fields left, return nil.
 	if len(fields) == 0 {
 		return nil
 	}
 
+	fieldName := fields[0].name
+
 	// Get the members based on the type of the parent.
-	var members []btf.Member
+	var targetType btf.Type
+	var targetOffsetBytes uint32
 	switch t := parent.(type) {
 	case *btf.Struct:
-		members = t.Members
+		for _, m := range t.Members {
+			if m.Name != fieldName {
+				continue
+			}
+
+			targetType = m.Type
+			targetOffsetBytes = m.Offset.Bytes()
+			break
+		}
 	case *btf.Union:
-		members = t.Members
+		for _, m := range t.Members {
+			if m.Name != fieldName {
+				continue
+			}
+
+			targetType = m.Type
+			targetOffsetBytes = m.Offset.Bytes()
+			break
+		}
+	case *btf.Array:
+		arrayIndex := uint64(0)
+		switch {
+		case strings.HasPrefix(fieldName, "enum:"):
+			enumTokens := strings.Split(fieldName, ":")
+			if len(enumTokens) != 3 {
+				return fmt.Errorf("index from enum invalid format: %w", ErrArrayIndexInvalidField)
+			}
+
+			enumName := enumTokens[1]
+			enumValueName := enumTokens[2]
+
+			var btfEnum *btf.Enum
+			if err := spec.TypeByName(enumName, &btfEnum); err != nil {
+				if errors.Is(err, btf.ErrNotFound) || err.Error() == "not found" {
+					return fmt.Errorf("enum not found in spec: %w", ErrArrayIndexInvalidField)
+				}
+				return err
+			}
+
+			found := false
+			for _, enumValue := range btfEnum.Values {
+				if enumValue.Name != enumValueName {
+					continue
+				}
+
+				arrayIndex = enumValue.Value
+				found = true
+				break
+			}
+
+			if !found {
+				return fmt.Errorf("index from enum not found: %w", ErrArrayIndexInvalidField)
+			}
+		case strings.HasPrefix(fieldName, "index:"):
+			indexTokens := strings.Split(fieldName, ":")
+			if len(indexTokens) != 2 {
+				return fmt.Errorf("index invalid format: %w", ErrArrayIndexInvalidField)
+			}
+			var err error
+			arrayIndex, err = strconv.ParseUint(indexTokens[1], 10, 32)
+			if err != nil {
+				return fmt.Errorf("index invalid unsigned int: %w", ErrArrayIndexInvalidField)
+			}
+		default:
+			return fmt.Errorf("unknown type of index field: %w", ErrArrayIndexInvalidField)
+		}
+
+		if uint32(arrayIndex) >= t.Nelems {
+			return fmt.Errorf("index bigger than array size: %w", ErrArrayIndexInvalidField)
+		}
+
+		targetType = t.Type
+		targetOffsetBytes = getArrayTypeSizeBytes(targetType) * uint32(arrayIndex)
+
 	case *btf.Pointer:
 		// if the parent type is a ptr proceed by passing its target but make the offset 0
 		// since we are entering a new ptr
-		return buildFieldsRecursive(t.Target, 0, fields)
+		return buildFieldsRecursive(spec, t.Target, 0, fields)
 	case *btf.Const:
-		return buildFieldsRecursive(t.Type, parentOffset, fields)
-	}
-
-	// Get the name of the first field.
-	memberName := fields[0].name
-
-	// Find the member with the matching name.
-	var member btf.Member
-	for _, m := range members {
-		if m.Name != memberName {
-			continue
-		}
-
-		member = m
-		break
+		return buildFieldsRecursive(spec, t.Type, parentOffsetBytes, fields)
 	}
 
 	// If the member type is nil, return an error.
-	if member.Type == nil {
-		return fmt.Errorf("getting field %s of type %s failed: %w", memberName, parent.TypeName(), ErrFieldNotFound)
+	if targetType == nil {
+		return fmt.Errorf("getting field %s of type %s failed: %w", fieldName, parent.TypeName(), ErrFieldNotFound)
 	}
 
 	// Handle different types of member types.
-	switch t := member.Type.(type) {
+	switch t := targetType.(type) {
 	case *btf.Pointer:
-		fields[0].offset = (parentOffset + member.Offset).Bytes()
+		fields[0].offset = parentOffsetBytes + targetOffsetBytes
 		fields[0].seen = true
 		fields[0].includeInOffset = true
 		fields[0].btfType = t.Target
 		fields[0].parentBtfType = parent
 		// if the member type is a ptr proceed by passing its target but make the offset 0
 		// since we are entering a new ptr
-		return buildFieldsRecursive(member.Type, 0, fields[1:])
-	case *btf.Struct, *btf.Union, *btf.Const:
+		return buildFieldsRecursive(spec, t.Target, 0, fields[1:])
+	case *btf.Array, *btf.Struct, *btf.Union, *btf.Const:
 		fields[0].seen = true
 		fields[0].includeInOffset = false
 		fields[0].btfType = t
 		fields[0].parentBtfType = parent
-		return buildFieldsRecursive(member.Type, member.Offset, fields[1:])
+		return buildFieldsRecursive(spec, targetType, parentOffsetBytes+targetOffsetBytes, fields[1:])
 	default:
-		fields[0].offset = (parentOffset + member.Offset).Bytes()
+		fields[0].offset = parentOffsetBytes + targetOffsetBytes
 		fields[0].seen = true
 		fields[0].includeInOffset = true
 		fields[0].btfType = t

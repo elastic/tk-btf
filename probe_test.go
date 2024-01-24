@@ -53,6 +53,62 @@ func TestProbes(t *testing.T) {
 			err:                nil,
 		},
 		{
+			name:        "kprobe_named_param_array",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "index:2", "val"),
+			),
+			expectedSymbol:     "test_function_with_ret",
+			expectedID:         "kprobe_test_function_with_ret",
+			expectedType:       ProbeTypeKProbe,
+			expectedTracingStr: "fa1=+1(+48(+4(%dx))):u32",
+			err:                nil,
+		},
+		{
+			name:        "kprobe_named_param_array_enum_index",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "enum:an_enum:ENUM_VAL_2", "val"),
+			),
+			expectedSymbol:     "test_function_with_ret",
+			expectedID:         "kprobe_test_function_with_ret",
+			expectedType:       ProbeTypeKProbe,
+			expectedTracingStr: "fa1=+1(+48(+4(%dx))):u32",
+			err:                nil,
+		},
+		{
+			name:        "kprobe_named_param_array_index_out_of_bounds",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "index:12", "val"),
+			),
+			err: ErrArrayIndexInvalidField,
+		},
+		{
+			name:        "kprobe_named_param_array_enum_index_out_of_bounds",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "enum:an_enum:ENUM_VAL_20", "val"),
+			),
+			err: ErrArrayIndexInvalidField,
+		},
+		{
+			name:        "kprobe_named_param_array_enum_not_found",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "enum:unknown:ENUM_VAL_20", "val"),
+			),
+			err: ErrArrayIndexInvalidField,
+		},
+		{
+			name:        "kprobe_named_param_array_enum_index_not_found",
+			symbolNames: []string{"test_function_with_ret"},
+			probe: NewKProbe().AddFetchArgs(
+				NewFetchArg("fa1", "u32").FuncParamWithName("tsk_param", "", "numbers", "enum:an_enum:UNKNOWN", "val"),
+			),
+			err: ErrArrayIndexInvalidField,
+		},
+		{
 			name:        "kprobe_duplicate_fetch_arg",
 			symbolNames: []string{"test_function"},
 			probe: NewKProbe().AddFetchArgs(

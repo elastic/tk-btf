@@ -52,6 +52,7 @@ func TestSpec(t *testing.T) {
 				NewFetchArg("fa4", "string").FuncParamArbitrary(1, WrapStructPointer, "dentry", "d_inode", "i_ino"),
 				NewFetchArg("fa5", "string").FuncParamArbitrary(1, WrapPointer, "dentry", "d_inode", "i_ino"),
 				NewFetchArg("fa6", "string").FuncParamArbitrary(1, WrapNone, "dentry", "d_inode", "i_ino"),
+				NewFetchArg("fa7", "u32").FuncParamWithName("tsk_param", "", "numbers", "enum:an_enum:ENUM_VAL_2", "val"),
 			),
 			NewKRetProbe().AddFetchArgs(
 				NewFetchArg("fa1", "u32").FuncReturn("d_inode", "i_ino"),
@@ -60,7 +61,7 @@ func TestSpec(t *testing.T) {
 		},
 		err: nil,
 		expectedTracingEventStrs: []string{
-			"fa1=+64(+48(%x0)):u32 fa2=+64(+48(%x0)):u32 fa3=+0(+64(+48(%x0))):string fa4=+0(+64(+48(+0(%x1)))):string fa5=+0(+64(+48(%x1))):string fa6=+0(+64(+48(%x1))):string",
+			"fa1=+64(+48(%x0)):u32 fa2=+64(+48(%x0)):u32 fa3=+0(+64(+48(%x0))):string fa4=+0(+64(+48(+0(%x1)))):string fa5=+0(+64(+48(%x1))):string fa6=+0(+64(+48(%x1))):string fa7=+1(+48(+4(%x2))):u32",
 			"fa1=+64(+48(%x0)):u32 fa2=+64(+48(+0(%x0))):u32",
 		},
 	}

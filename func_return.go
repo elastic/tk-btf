@@ -30,7 +30,7 @@ type funcReturn struct {
 }
 
 // build
-func (p *funcReturn) build(_ btfSpec, probeType ProbeType, funcType *btf.Func, regs registersResolver) (string, error) {
+func (p *funcReturn) build(spec btfSpec, probeType ProbeType, funcType *btf.Func, regs registersResolver) (string, error) {
 
 	// funcReturn is compatible only with ProbeTypeKRetProbe
 	if probeType != ProbeTypeKRetProbe {
@@ -44,7 +44,7 @@ func (p *funcReturn) build(_ btfSpec, probeType ProbeType, funcType *btf.Func, r
 	}
 
 	// If there are fields defined for the fieldsBuilder, build them recursively
-	if err := buildFieldsRecursive(funcProtoType.Return, 0, p.fields); err != nil {
+	if err := buildFieldsRecursive(spec, funcProtoType.Return, 0, p.fields); err != nil {
 		return "", err
 	}
 
