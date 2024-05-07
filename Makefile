@@ -1,3 +1,6 @@
+GO_LICENSE_DETECTOR := go run go.elastic.co/go-licence-detector@v0.6.0
+GO_LICENSER := go run github.com/elastic/go-licenser@v0.4.1
+
 .PHONY: tidy lint test notice write-license-headers
 
 all: tidy lint test notice write-license-headers
@@ -15,7 +18,7 @@ notice:
 	@echo "Generate NOTICE"
 	go mod tidy
 	go mod download
-	go list -m -json all | go run go.elastic.co/go-licence-detector \
+	go list -m -json all | $(GO_LICENSE_DETECTOR) \
 		-includeIndirect \
 		-rules tools/notice/rules.json \
 		-overrides tools/notice/overrides.json \
@@ -25,7 +28,7 @@ notice:
 
 write-license-headers:
 	@echo "Write license headers"
-	go run github.com/elastic/go-licenser \
+	$(GO_LICENSER) \
 		-ext ".go" \
 		-license ASL2 \
 		-licensor "Elasticsearch B.V." \
