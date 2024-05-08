@@ -2,7 +2,7 @@
   "jobs": [
     {
       "enabled": true,
-      "pipeline_slug": "tk-btf-pull-request-pipeline",
+      "pipeline_slug": "tk-btf",
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
       "allowed_list": ["github-actions[bot]"],
