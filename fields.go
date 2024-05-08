@@ -206,6 +206,7 @@ func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint3
 		}
 	case *btf.Array:
 		arrayIndex := uint64(0)
+
 		switch {
 		case strings.HasPrefix(fieldName, "enum:"):
 			enumTokens := strings.Split(fieldName, ":")
