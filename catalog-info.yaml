@@ -18,9 +18,24 @@ spec:
     kind: Pipeline
     metadata:
       name: tk-btf
+      description: ':go: Build and test tk-btf'
     spec:
       repository: elastic/tk-btf
       pipeline_file: ".buildkite/pipeline.yml"
+      maximum_timeout_in_minutes: 120
+      provider_settings:
+        build_pull_request_forks: false
+        build_pull_requests: true # requires filter_enabled and filter_condition settings as below when used with buildkite-pr-bot
+        build_tags: true
+        filter_enabled: true
+        filter_condition: >-
+          build.pull_request.id == null || (build.creator.name == 'elasticmachine' && build.pull_request.id != null)
+      cancel_intermediate_builds: true
+      cancel_intermediate_builds_branch_filter: '!main'
+      skip_intermediate_builds: true
+      skip_intermediate_builds_branch_filter: '!main'
+      env:
+        ELASTIC_PR_COMMENTS_ENABLED: 'true'
       teams:
         sec-linux-platform:
           access_level: MANAGE_BUILD_AND_READ
