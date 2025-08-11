@@ -1,5 +1,5 @@
 tk-btf
-Copyright 2023-2024 Elasticsearch BV
+Copyright 2023-2025 Elasticsearch BV
 
 ================================================================================
 Third party libraries used by tk-btf:
