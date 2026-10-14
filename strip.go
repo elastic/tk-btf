@@ -104,13 +104,14 @@ func (t typesToStripMap) checkTypeInMap(spec btfSpec, typ btf.Type) bool {
 }
 
 // keepMember reports whether strip must keep the member. An anonymous member is kept when its
-// type is in the map, i.e. when it holds a field to keep.
+// type is in the map, i.e. when it holds a field to keep. The type is unwrapped like in findMember,
+// which records it.
 func (t typesToStripMap) keepMember(spec btfSpec, typ *typeToStrip, member btf.Member) bool {
 	if _, exists := typ.fieldsToKeep[member.Name]; exists {
 		return true
 	}
 
-	return member.Name == "" && t.checkTypeInMap(spec, member.Type)
+	return member.Name == "" && t.checkTypeInMap(spec, btf.UnderlyingType(member.Type))
 }
 
 // strip removes fields that are not in the typesToStripMap.

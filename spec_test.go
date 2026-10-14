@@ -160,6 +160,24 @@ func TestSpec_AnyTypesByName(t *testing.T) {
 // TestSpec_StripAndSave_anonymousMember checks that a field inside an anonymous union (dentry.d_name
 // since Linux 6.18) survives StripAndSave, and that the anonymous union is stripped like any other type.
 func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
+	cases := []struct {
+		name string
+		// wrap returns the type of the anonymous member that holds d_name.
+		wrap func(u *btf.Union) btf.Type
+	}{
+		{name: "plain", wrap: func(u *btf.Union) btf.Type { return u }},
+		{name: "volatile", wrap: func(u *btf.Union) btf.Type { return &btf.Volatile{Type: u} }},
+		{name: "typedef", wrap: func(u *btf.Union) btf.Type { return &btf.Typedef{Name: "name_union_t", Type: u} }},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			testStripAndSaveAnonymousMember(t, c.wrap)
+		})
+	}
+}
+
+func testStripAndSaveAnonymousMember(t *testing.T, wrap func(u *btf.Union) btf.Type) {
 	typeInt := &btf.Int{Name: "int", Size: 4}
 	typeChar := &btf.Int{Name: "char", Size: 1}
 	qstr := &btf.Struct{
@@ -174,6 +192,7 @@ func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
 		{Name: "__d_name", Type: qstr},
 		{Name: "d_name", Type: &btf.Const{Type: qstr}},
 	}}
+	nameMemberType := wrap(nameUnion)
 	otherUnion := &btf.Union{Size: 4, Members: []btf.Member{
 		{Name: "u_a", Type: typeInt},
 		{Name: "u_b", Type: typeInt},
@@ -183,7 +202,7 @@ func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
 		Size: 64,
 		Members: []btf.Member{
 			{Name: "d_flags", Type: typeInt, Offset: 0},
-			{Type: nameUnion, Offset: 256},
+			{Type: nameMemberType, Offset: 256},
 			{Type: otherUnion, Offset: 384},
 		},
 	}
@@ -192,17 +211,21 @@ func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
 		Params: []btf.FuncParam{{Name: "dentry_param", Type: &btf.Pointer{Target: dentry}}},
 	}
 
+	types := map[string]btf.Type{
+		"int":                 typeInt,
+		"char":                typeChar,
+		"qstr":                qstr,
+		"dentry_name_union":   nameUnion,
+		"dentry_other_union":  otherUnion,
+		"dentry":              dentry,
+		"test_function_proto": proto,
+		"test_function":       &btf.Func{Name: "test_function", Type: proto},
+	}
+	if nameMemberType != btf.Type(nameUnion) {
+		types["dentry_name_member"] = nameMemberType
+	}
 	spec := &Spec{
-		spec: newMockedBTFSpecWithTypesMap(map[string]btf.Type{
-			"int":                 typeInt,
-			"char":                typeChar,
-			"qstr":                qstr,
-			"dentry_name_union":   nameUnion,
-			"dentry_other_union":  otherUnion,
-			"dentry":              dentry,
-			"test_function_proto": proto,
-			"test_function":       &btf.Func{Name: "test_function", Type: proto},
-		}),
+		spec: newMockedBTFSpecWithTypesMap(types),
 		regs: &registersAmd64{},
 	}
 
@@ -219,7 +242,7 @@ func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
 
 		var layout []string
 		for _, m := range types[0].(*btf.Struct).Members {
-			if u, ok := m.Type.(*btf.Union); ok && m.Name == "" {
+			if u, ok := btf.UnderlyingType(m.Type).(*btf.Union); ok && m.Name == "" {
 				for _, um := range u.Members {
 					layout = append(layout, "anon."+um.Name)
 				}
