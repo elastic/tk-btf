@@ -133,6 +133,12 @@ func (s *Spec) StripAndSave(pathToSave string, symbolsToInclude ...*Symbol) erro
 							}
 						}
 
+						for _, anonParent := range paramField.anonParents {
+							if err := typesToKeep.addTypeField(s.spec, anonParent, paramField.name); err != nil {
+								return err
+							}
+						}
+
 						if err := typesToKeep.addType(s.spec, paramField.btfType); err != nil {
 							return err
 						}
