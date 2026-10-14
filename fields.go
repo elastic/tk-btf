@@ -169,6 +169,39 @@ func getArrayTypeSizeBytes(btfType btf.Type) uint32 {
 	}
 }
 
+// findMember returns the type and byte offset of the member with the given name, or a nil type if
+// there is none. Like C, it also searches the members of anonymous structs and unions, since the
+// kernel moves fields into them (e.g. dentry.d_name since Linux 6.18).
+func findMember(members []btf.Member, name string) (btf.Type, uint32) {
+	for _, m := range members {
+		if m.Name == name {
+			return m.Type, m.Offset.Bytes()
+		}
+	}
+
+	for _, m := range members {
+		if m.Name != "" {
+			continue
+		}
+
+		var inner []btf.Member
+		switch t := btf.UnderlyingType(m.Type).(type) {
+		case *btf.Struct:
+			inner = t.Members
+		case *btf.Union:
+			inner = t.Members
+		default:
+			continue
+		}
+
+		if typ, offset := findMember(inner, name); typ != nil {
+			return typ, m.Offset.Bytes() + offset
+		}
+	}
+
+	return nil, 0
+}
+
 // buildFieldsRecursive recursively builds fields based on the parent type and fields slice.
 // It returns ErrFieldNotFound if any field is not found.
 func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint32, fields []*field) error {
@@ -185,25 +218,9 @@ func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint3
 	var targetOffsetBytes uint32
 	switch t := parent.(type) {
 	case *btf.Struct:
-		for _, m := range t.Members {
-			if m.Name != fieldName {
-				continue
-			}
-
-			targetType = m.Type
-			targetOffsetBytes = m.Offset.Bytes()
-			break
-		}
+		targetType, targetOffsetBytes = findMember(t.Members, fieldName)
 	case *btf.Union:
-		for _, m := range t.Members {
-			if m.Name != fieldName {
-				continue
-			}
-
-			targetType = m.Type
-			targetOffsetBytes = m.Offset.Bytes()
-			break
-		}
+		targetType, targetOffsetBytes = findMember(t.Members, fieldName)
 	case *btf.Array:
 		arrayIndex := uint64(0)
 		switch {
