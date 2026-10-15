@@ -156,3 +156,129 @@ func TestSpec_AnyTypesByName(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, foundTypes, 1)
 }
+
+// TestSpec_StripAndSave_anonymousMember checks that a field inside an anonymous union (dentry.d_name
+// since Linux 6.18) survives StripAndSave, and that the anonymous union is stripped like any other type.
+func TestSpec_StripAndSave_anonymousMember(t *testing.T) {
+	cases := []struct {
+		name string
+		// wrap returns the type of the anonymous member that holds d_name.
+		wrap func(u *btf.Union) btf.Type
+	}{
+		{name: "plain", wrap: func(u *btf.Union) btf.Type { return u }},
+		{name: "volatile", wrap: func(u *btf.Union) btf.Type { return &btf.Volatile{Type: u} }},
+		{name: "typedef", wrap: func(u *btf.Union) btf.Type { return &btf.Typedef{Name: "name_union_t", Type: u} }},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			testStripAndSaveAnonymousMember(t, c.wrap)
+		})
+	}
+}
+
+func testStripAndSaveAnonymousMember(t *testing.T, wrap func(u *btf.Union) btf.Type) {
+	typeInt := &btf.Int{Name: "int", Size: 4}
+	typeChar := &btf.Int{Name: "char", Size: 1}
+	qstr := &btf.Struct{
+		Name: "qstr",
+		Size: 16,
+		Members: []btf.Member{
+			{Name: "hash_len", Type: &btf.Int{Name: "u64", Size: 8}, Offset: 0},
+			{Name: "name", Type: &btf.Pointer{Target: &btf.Const{Type: typeChar}}, Offset: 64},
+		},
+	}
+	nameUnion := &btf.Union{Size: 16, Members: []btf.Member{
+		{Name: "__d_name", Type: qstr},
+		{Name: "d_name", Type: &btf.Const{Type: qstr}},
+	}}
+	nameMemberType := wrap(nameUnion)
+	otherUnion := &btf.Union{Size: 4, Members: []btf.Member{
+		{Name: "u_a", Type: typeInt},
+		{Name: "u_b", Type: typeInt},
+	}}
+	dentry := &btf.Struct{
+		Name: "dentry",
+		Size: 64,
+		Members: []btf.Member{
+			{Name: "d_flags", Type: typeInt, Offset: 0},
+			{Type: nameMemberType, Offset: 256},
+			{Type: otherUnion, Offset: 384},
+		},
+	}
+	proto := &btf.FuncProto{
+		Return: typeInt,
+		Params: []btf.FuncParam{{Name: "dentry_param", Type: &btf.Pointer{Target: dentry}}},
+	}
+
+	types := map[string]btf.Type{
+		"int":                 typeInt,
+		"char":                typeChar,
+		"qstr":                qstr,
+		"dentry_name_union":   nameUnion,
+		"dentry_other_union":  otherUnion,
+		"dentry":              dentry,
+		"test_function_proto": proto,
+		"test_function":       &btf.Func{Name: "test_function", Type: proto},
+	}
+	if nameMemberType != btf.Type(nameUnion) {
+		types["dentry_name_member"] = nameMemberType
+	}
+	spec := &Spec{
+		spec: newMockedBTFSpecWithTypesMap(types),
+		regs: &registersAmd64{},
+	}
+
+	const expected = "n=+0(+40(%di)):string"
+	symbol := NewSymbol("test_function").AddProbes(
+		NewKProbe().AddFetchArgs(NewFetchArg("n", "string").FuncParamWithName("dentry_param", "d_name", "name")),
+	)
+
+	// strippedLayout returns the member names of dentry and of its anonymous members.
+	strippedLayout := func(t *testing.T, s *Spec) []string {
+		types, err := s.spec.AnyTypesByName("dentry")
+		require.NoError(t, err, "dentry is missing from the stripped spec")
+		require.Len(t, types, 1, "expected exactly one dentry type")
+
+		var layout []string
+		for _, m := range types[0].(*btf.Struct).Members {
+			if u, ok := btf.UnderlyingType(m.Type).(*btf.Union); ok && m.Name == "" {
+				for _, um := range u.Members {
+					layout = append(layout, "anon."+um.Name)
+				}
+				continue
+			}
+			layout = append(layout, m.Name)
+		}
+		return layout
+	}
+
+	require.NoError(t, spec.BuildSymbol(symbol), "building on the full spec failed")
+	require.Equal(t, expected, symbol.GetProbes()[0].GetTracingEventProbe(), "unexpected fetcharg on the full spec")
+
+	fileName := filepath.Join(t.TempDir(), "btfFile")
+	require.NoError(t, spec.StripAndSave(fileName, symbol), "stripping the full spec failed")
+
+	pathSpec, err := NewSpecFromPath(fileName, &SpecOptions{arch: "amd64"})
+	require.NoError(t, err, "loading the stripped spec failed")
+	require.Equal(t, []string{"anon.d_name"}, strippedLayout(t, pathSpec), "unexpected dentry layout after stripping")
+
+	require.NoError(t, pathSpec.BuildSymbol(symbol), "building on the stripped spec failed")
+	require.Equal(t, expected, symbol.GetProbes()[0].GetTracingEventProbe(), "unexpected fetcharg on the stripped spec")
+
+	// re-strip the stripped spec, which is an actual *btf.Spec, and load it again
+	require.NoError(t, pathSpec.StripAndSave(fileName, symbol), "re-stripping the stripped spec failed")
+
+	file, err := os.Open(fileName)
+	require.NoError(t, err)
+	defer func() {
+		_ = file.Close()
+	}()
+
+	readerSpec, err := NewSpecFromReader(file, &SpecOptions{arch: "amd64"})
+	require.NoError(t, err, "loading the re-stripped spec failed")
+	require.Equal(t, []string{"anon.d_name"}, strippedLayout(t, readerSpec), "unexpected dentry layout after re-stripping")
+
+	require.NoError(t, readerSpec.BuildSymbol(symbol), "building on the re-stripped spec failed")
+	require.Equal(t, expected, symbol.GetProbes()[0].GetTracingEventProbe(), "unexpected fetcharg on the re-stripped spec")
+}

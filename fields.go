@@ -33,6 +33,9 @@ type field struct {
 	includeInOffset bool
 	parentBtfType   btf.Type
 	btfType         btf.Type
+	// anonParents are the anonymous struct and union types, outermost first, between
+	// parentBtfType and this field. StripAndSave must keep them, or the field is lost.
+	anonParents []btf.Type
 }
 
 // paramFieldsFromNames initializes and returns a slice of field pointers based on the provided field names.
@@ -169,6 +172,41 @@ func getArrayTypeSizeBytes(btfType btf.Type) uint32 {
 	}
 }
 
+// findMember returns the type and byte offset of the member with the given name, or a nil type if
+// there is none. Like C, it also searches the members of anonymous structs and unions, since the
+// kernel moves fields into them (e.g. dentry.d_name since Linux 6.18). In that case the offset
+// includes the offsets of the anonymous members, and anonParents holds their types, outermost first.
+func findMember(members []btf.Member, name string) (typ btf.Type, offset uint32, anonParents []btf.Type) {
+	for _, m := range members {
+		if m.Name == name {
+			return m.Type, m.Offset.Bytes(), nil
+		}
+	}
+
+	for _, m := range members {
+		if m.Name != "" {
+			continue
+		}
+
+		anonType := btf.UnderlyingType(m.Type)
+		var inner []btf.Member
+		switch t := anonType.(type) {
+		case *btf.Struct:
+			inner = t.Members
+		case *btf.Union:
+			inner = t.Members
+		default:
+			continue
+		}
+
+		if typ, offset, innerAnon := findMember(inner, name); typ != nil {
+			return typ, m.Offset.Bytes() + offset, append([]btf.Type{anonType}, innerAnon...)
+		}
+	}
+
+	return nil, 0, nil
+}
+
 // buildFieldsRecursive recursively builds fields based on the parent type and fields slice.
 // It returns ErrFieldNotFound if any field is not found.
 func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint32, fields []*field) error {
@@ -183,27 +221,12 @@ func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint3
 	// Get the members based on the type of the parent.
 	var targetType btf.Type
 	var targetOffsetBytes uint32
+	var anonParents []btf.Type
 	switch t := parent.(type) {
 	case *btf.Struct:
-		for _, m := range t.Members {
-			if m.Name != fieldName {
-				continue
-			}
-
-			targetType = m.Type
-			targetOffsetBytes = m.Offset.Bytes()
-			break
-		}
+		targetType, targetOffsetBytes, anonParents = findMember(t.Members, fieldName)
 	case *btf.Union:
-		for _, m := range t.Members {
-			if m.Name != fieldName {
-				continue
-			}
-
-			targetType = m.Type
-			targetOffsetBytes = m.Offset.Bytes()
-			break
-		}
+		targetType, targetOffsetBytes, anonParents = findMember(t.Members, fieldName)
 	case *btf.Array:
 		arrayIndex := uint64(0)
 		switch {
@@ -271,6 +294,8 @@ func buildFieldsRecursive(spec btfSpec, parent btf.Type, parentOffsetBytes uint3
 	if targetType == nil {
 		return fmt.Errorf("getting field %s of type %s failed: %w", fieldName, parent.TypeName(), ErrFieldNotFound)
 	}
+
+	fields[0].anonParents = anonParents
 
 	// Handle different types of member types.
 	switch t := targetType.(type) {
